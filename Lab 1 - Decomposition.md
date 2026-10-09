@@ -126,11 +126,13 @@ Working alone or in pairs, produce a written decomposition of
 `FEATURE_REQUEST.md` in the style of the "good" example above. At minimum,
 identify:
 
-1. **The units of work.** Aim for 4-6. As a hint (not an answer key — you
-   should reason to this yourself first): the feature has a schema piece,
-   an API/permissions-enforcement piece, a frontend workspace-switcher
-   piece, and a notification piece. Decide for yourself whether any of
-   those are still too big and need splitting further.
+1. **The units of work.** Aim for 4: one foundation unit that everything
+   else depends on, plus three independent units you'll run in parallel
+   worktrees in Lab 3. As a hint (not an answer key — you should reason to
+   this yourself first): the feature has a schema piece, an
+   API/permissions-enforcement piece, a frontend workspace-switcher piece,
+   and a notification piece. If one of those feels too big, break it into
+   steps inside that unit rather than adding more units.
 2. **For each unit:** a one-paragraph description, 3-5 acceptance criteria,
    explicit dependencies (what must be done first), and how you'd verify it.
 3. **A dependency graph or ordered list** showing what can run in parallel
