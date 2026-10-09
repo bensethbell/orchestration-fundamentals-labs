@@ -8,6 +8,13 @@ then reconcile and merge their output.
 
 This is the payoff lab — everything in Modules 1 and 2 was setup for this.
 
+**Where to run things.** The git repo is `orchestration-fundamentals-labs/`
+and the app is in its `taskboard/` folder. Run commands from
+`orchestration-fundamentals-labs/taskboard/` (where you've been working
+since Lab 1) unless a step says otherwise. A worktree is a full copy of
+the repo, so inside each worktree session the app is in that worktree's
+own `taskboard/` folder.
+
 ---
 
 ## 0. Land the foundation first, sequentially (10 min)
@@ -125,7 +132,8 @@ extra explanation going into a lab that's already teaching worktrees —
 reach for `--bg` or `--tmux` only if you already know them.
 
 Each command opens an isolated session with its own working directory and
-branch under `.claude/worktrees/`. Confirm you actually have three separate
+branch under `.claude/worktrees/` at the repo root (not inside
+`taskboard/`). Confirm you actually have three separate
 directories before proceeding, and **note the exact branch name next to
 each one** — Claude Code names it `worktree-<name>` (e.g.
 `worktree-unit-a-api`), not just `<name>`, so check rather than assume
@@ -158,9 +166,15 @@ you follow-up questions mid-task. Example for Unit A:
 ```
 > Implement the API & permission enforcement unit:
 > [paste your spec]
-> The workspace/membership schema already exists on main (see app/db.py).
-> Do not modify the schema. Add tests in tests/test_workspace_permissions.py.
+> The app is in the taskboard/ folder; run tests from there.
+> The workspace/membership schema already exists on main (see
+> taskboard/app/db.py). Do not modify the schema. Add tests in
+> taskboard/tests/test_workspace_permissions.py.
 ```
+
+Include the "app is in the taskboard/ folder" line in all three briefs:
+the worktree session starts at the repo root, so without it the agent may
+look for `app/` in the wrong place.
 
 If you're using custom subagents rather than three top-level sessions,
 apply least-privilege tool scoping per agent — a research/investigation
@@ -188,8 +202,10 @@ While the three sessions work, do not sit idle — this is a good moment to:
   unit for last — that's where the one real conflict will be.
 
 As each session finishes, verify it **inside its own worktree**, before
-merging anything:
+merging anything. Tests only run from the `taskboard/` folder, so in the
+worktree run:
 ```
+cd taskboard
 python -m unittest discover -s tests -v
 ```
 
@@ -205,7 +221,7 @@ their output, and you are about to choose a merge order. In this step you
 hand the *checking* part to a fourth agent. You keep the decisions.
 
 1. On `main` (not inside a worktree), create
-   `.claude/agents/integration-reviewer.md`. Write the frontmatter and
+   `taskboard/.claude/agents/integration-reviewer.md`. Write the frontmatter and
    prompt yourself. Your agent must:
    - be **read-only**: no `Edit` or `Write` in its `tools` list. It reports,
      and you merge.
@@ -213,14 +229,14 @@ hand the *checking* part to a fourth agent. You keep the decisions.
      decomposition).
    - for each `worktree-*` branch: list the files it changed compared with
      `main`, flag any file outside that unit's scope, and run the test suite
-     inside that unit's worktree.
+     from the `taskboard/` folder of that unit's worktree.
    - name any function that more than one branch changed.
    - finish with a recommended merge order and what to check after each
      merge, and then stop.
 
    Choose its `model` the way you did in Lab 2, and be ready to say why.
 
-2. Open a fourth terminal tab in the repo root on `main`, start a new
+2. Open a fourth terminal tab in `taskboard/` on `main`, start a new
    `claude` session (subagents are loaded when a session starts), and run:
    ```
    > Use the integration-reviewer agent to review the three worktree units.
@@ -411,7 +427,12 @@ actual done state — not just a green test suite.
 
 ### Clean up
 
+The worktrees live at the repo root, so run this from
+`orchestration-fundamentals-labs/`, one level up from `taskboard/`:
+
 ```
+cd ..
+git worktree list
 git worktree remove .claude/worktrees/unit-a-api
 git worktree remove .claude/worktrees/unit-b-frontend
 git worktree remove .claude/worktrees/unit-c-notifications
