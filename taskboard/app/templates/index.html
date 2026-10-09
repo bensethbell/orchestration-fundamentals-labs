@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head>
+  <title>TaskBoard</title>
+</head>
+<body>
+  <h1>TaskBoard</h1>
+  <ul>
+    {% for task in tasks %}
+      <li>[{{ task.status }}] {{ task.title }} ({{ task.owner or "unassigned" }})</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
