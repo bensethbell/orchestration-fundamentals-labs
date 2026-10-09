@@ -1,18 +1,5 @@
-# Unit 1 Reference Decomposition — Workspaces & Roles
+# Task Decomposition - Taskboard
 
-Updated copy of Unit 1 from `my-decomposition.md` (v1). Everything else is
-unchanged from v1. What changed:
-
-- **Existing database.** Students create `taskboard.db` in Lab 1 step 0 by
-  running `seed_demo.py`. Adding `workspace_id` to the
-  `CREATE TABLE IF NOT EXISTS task` statement does nothing on a database
-  that already exists, so Unit 1 also has to add the column to it. Added to
-  the description, one new acceptance criterion, and the verify step.
-- **`seed_demo.py`.** The Lab 1 handout requires the schema unit to use the
-  names `seed_demo.py` expects and to run it cleanly. That is now part of
-  the new criterion and the verify step.
-
----
 
 ## Unit 1 — Workspace and membership schema
 
@@ -61,3 +48,9 @@ python -c "import sqlite3; print([r[1] for r in sqlite3.connect('taskboard.db').
 
 `seed_demo.py` should report the Engineering and Marketing workspaces, and
 the column list should end with `workspace_id`.
+
+## Unit 2
+
+## Unit 3
+
+## Unit 4
