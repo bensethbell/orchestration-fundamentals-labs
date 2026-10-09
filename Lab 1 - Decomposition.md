@@ -1,7 +1,7 @@
 # Lab 1: Decomposing a Feature Into Agent-Ready Units of Work
 
 **Module:** Decomposing Complex Features for Multi-Agent Execution
-**Time:** 40 minutes
+**Time:** 35 minutes
 **Codebase:** `taskboard/` (see `README.md` and `FEATURE_REQUEST.md` in the repo)
 **Goal:** Turn the Workspaces & Roles feature request into a set of units of
 work that (a) an agent could execute mostly unsupervised, and (b) you could
@@ -43,15 +43,20 @@ script as a fixed part of the codebase:
   `workspace (id, name)` and `workspace_member (workspace_id, user_id, role)`,
   with `role` either `'admin'` or `'member'`. These are the same names as the
   worked example below.
-- **Give your schema unit an acceptance criterion for it:** on a fresh
-  database, `python seed_demo.py` runs without errors and reports both
-  workspaces.
+- **Give your schema unit an acceptance criterion for it:** against the
+  `taskboard.db` you already have (don't delete it), `python seed_demo.py`
+  runs without errors and reports both workspaces.
+- **Your schema unit has to work with that existing database.** Running
+  `seed_demo.py` just now created `taskboard.db` with the original `task`
+  table, and `CREATE TABLE IF NOT EXISTS` never changes a table that already
+  exists. Any new `task` column has to be added to the existing database
+  too, or it will be missing when Lab 3's demo needs it.
 - **No unit should modify `seed_demo.py`.** If a unit seems to need different
   demo data, write that down as an open question instead.
 
 ---
 
-## 1. What makes a unit of work "agent-ready"? (read this, then move on — 5 min)
+## 1. What makes a unit of work "agent-ready"? (covered in the lecture — skim it as a reference)
 
 A unit of work is agent-ready when it has all four of these:
 
@@ -86,17 +91,24 @@ plausible-looking decisions you now have to review as one giant diff.
 > `app/db.py`, following the existing style (plain `sqlite3`, schema defined
 > in the `SCHEMA` string, accessor functions below it — no ORM). Add a
 > `workspace_id` column to the existing `task` table (nullable for now, so
-> existing rows don't break).
+> existing rows don't break). Because `taskboard.db` already exists,
+> `init_db()` must also add that column to existing databases: if `task` has
+> no `workspace_id` column, run
+> `ALTER TABLE task ADD COLUMN workspace_id INTEGER`.
 >
 > **Acceptance criteria:**
 > - `SCHEMA` includes both new tables and the altered `task` table.
 > - Existing tests in `tests/test_tasks.py` still pass unmodified.
 > - New accessor functions exist: `create_workspace(name)`,
->   `add_member(workspace_id, user_id, role)`, `list_workspaces_for_user(user_id)`.
+>   `add_member(workspace_id, user_id, role)`, `list_workspaces_for_user(user_id)`,
+>   `get_member_role(workspace_id, user_id)` (returns `None` for a
+>   non-member; the permissions unit uses it to check roles).
 > - A short new test file `tests/test_workspaces.py` covers creating a
 >   workspace, adding a member, and listing workspaces for a user.
-> - On a fresh database, `python seed_demo.py` runs cleanly and reports the
->   Engineering and Marketing workspaces.
+> - Against the existing `taskboard.db` (without deleting it), existing
+>   tasks are kept, `task` has a `workspace_id` column, and
+>   `python seed_demo.py` runs cleanly and reports the Engineering and
+>   Marketing workspaces.
 >
 > **Depends on:** nothing (this is the foundation).
 > **Blocks:** the API/permissions unit, the frontend switcher unit, and the
@@ -176,5 +188,5 @@ decomposition, only better- and worse-specified ones.
 
 You should leave this lab with a written decomposition (units, acceptance
 criteria, dependencies, open questions) that you'll hand to Claude Code in
-Lab 2 (to assign models) and Lab 3 (to run in parallel worktrees). Keep the
-file open — you'll need it again shortly.
+Lab 3 (to run in parallel worktrees). Keep the file somewhere you can find
+it — you'll need it again after Lab 2.

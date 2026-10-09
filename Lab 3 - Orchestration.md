@@ -3,8 +3,7 @@
 **Module:** Orchestrating Multiple Agent Sessions
 **Time:** 60 minutes
 **Codebase:** `taskboard/`
-**Goal:** Take the decomposition from Lab 1 (and any code from Lab 2) and
-actually run multiple Claude Code sessions in parallel using git worktrees,
+**Goal:** Take the decomposition from Lab 1 and actually run multiple Claude Code sessions in parallel using git worktrees,
 then reconcile and merge their output.
 
 This is the payoff lab — everything in Modules 1 and 2 was setup for this.
@@ -18,9 +17,13 @@ same time. They do not help with work that has to happen in order. Your
 schema/migration unit (Unit 1 from Lab 1) is a hard dependency for
 everything else, so it goes first, on `main`, with no parallelism:
 
-1. Make sure the schema unit is actually done and tests pass. If you ran
-   Task C for real in Lab 2 and you're happy with the result, use that. If
-   not, do it now:
+1. Start from a clean `main`. Your Lab 2 work stays on its own `lab2-*`
+   branches:
+   ```
+   git switch main
+   git status
+   ```
+   `git status` should show nothing to commit. Then build the schema unit:
    ```
    claude
    > Implement the workspace/membership schema unit from FEATURE_REQUEST.md:
@@ -36,7 +39,16 @@ everything else, so it goes first, on `main`, with no parallelism:
    ```
    It should report the Engineering and Marketing workspaces. If it says
    the tables don't match, the schema doesn't use the names from Lab 1.
-   Fix the schema, not the script.
+   Fix the schema, not the script. Finally, confirm your existing
+   `taskboard.db` really gained the new column:
+   ```
+   python -c "import sqlite3; print([r[1] for r in sqlite3.connect('taskboard.db').execute('PRAGMA table_info(task)')])"
+   ```
+   The list should end with `workspace_id`. If it doesn't, the unit only
+   changed `CREATE TABLE IF NOT EXISTS`, which never alters a table that
+   already exists. Tests and `seed_demo.py` still pass in that case, but
+   creating a task in a workspace fails later in the demo. Fix the unit so
+   it adds the column to existing databases.
 3. Commit it to `main`:
    ```
    git add -A && git commit -m "Add workspace and membership schema"

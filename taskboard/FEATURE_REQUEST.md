@@ -42,6 +42,9 @@ Add multi-workspace support to TaskBoard:
 - The data model has a real dependency chain: nothing else can be built until
   workspaces and workspace membership exist in the schema. That's
   deliberate — it's the sequencing example for Module 1.
+- The repo's `seed_demo.py` loads the demo data used in later labs. Use the
+  table and column names it expects (they're listed at the top of the
+  script), and don't modify it.
 - Once the schema/migration piece is done, the API/permissions work, the
   frontend workspace switcher, and the notification hook are largely
   independent of each other and don't touch the same files — that's
