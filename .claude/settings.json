@@ -1,0 +1,16 @@
+{
+  "worktree": { "baseRef": "head" },
+  "permissions": {
+    "allow": [
+      "Bash(python -m unittest *)",
+      "Bash(cd taskboard && python -m unittest *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git merge *)",
+      "Bash(git rev-parse *)",
+      "Bash(git worktree *)"
+    ]
+  }
+}
