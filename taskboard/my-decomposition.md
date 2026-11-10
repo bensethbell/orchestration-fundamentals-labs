@@ -49,8 +49,76 @@ python -c "import sqlite3; print([r[1] for r in sqlite3.connect('taskboard.db').
 `seed_demo.py` should report the Engineering and Marketing workspaces, and
 the column list should end with `workspace_id`.
 
-## Unit 2
+## Unit 2 — API & permission enforcement
 
-## Unit 3
+**Description:** (2–4 sentences: which endpoints change, how a request
+says which workspace it's for, how the app knows who is asking, and which
+files you expect to touch.)
 
-## Unit 4
+**Acceptance criteria:** Fill in the `?` cells with the status code each
+caller should get, then add any rules the table doesn't cover (for
+example: who owns a task created without an owner? What happens if a task
+is assigned to someone outside the workspace?).
+
+| Request | Admin | Member | Not a member | No user |
+|---|---|---|---|---|
+| List tasks | 200 | 200 | ? | 401 |
+| Create a task | 201 | 201 | ? | ? |
+| Edit a task they own | 200 | 200 | ? | ? |
+| Edit someone else's task | 200 | ? | ? | ? |
+| Delete a task | 204 | ? | ? | ? |
+
+Other rules:
+-
+-
+
+**Depends on:** (Which unit must land first, and what does this unit use
+from it?)
+**Blocks:** (Does anything wait on this? Which files does it share with
+other units?)
+
+**Verify:** (How will *you* check it? Hint: each table row is one curl
+command.)
+
+## Unit 3 — Frontend workspace switcher
+
+**Description:** (2–4 sentences: what the user sees on the page, how they
+switch workspaces, how the page knows which workspace is selected, and
+which files you expect to touch.)
+
+**Acceptance criteria:** (3–5 things you could check by looking at the
+page or running a test. Think about the edge cases too: a user in no
+workspace, a user who isn't logged in, a workspace in the URL that isn't
+theirs.)
+-
+-
+-
+
+**Depends on:** (Which unit must land first, and what does this unit use
+from it?)
+**Blocks:** (Does anything wait on this? Which files does it share with
+other units?)
+
+**Verify:** (How will *you* check it? Which users would you log in as, and
+what should each one see?)
+
+## Unit 4 — Assignment notifications
+
+**Description:** (2–4 sentences: what triggers a notification, what
+"sending" it means in this app, where the hook goes, and which files you
+expect to touch.)
+
+**Acceptance criteria:** (3–5 things a test could check. Cover when it
+*should* notify and when it *shouldn't*: no owner, the same owner again,
+an edit that doesn't change the owner.)
+-
+-
+-
+
+**Depends on:** (Which unit must land first, and what does this unit use
+from it?)
+**Blocks:** (Does anything wait on this? Which files does it share with
+other units?)
+
+**Verify:** (How will *you* check it? Where would you look to see that a
+notification happened?)

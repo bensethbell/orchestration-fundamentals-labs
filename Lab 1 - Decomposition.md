@@ -144,9 +144,14 @@ identify:
    workspace? Can a user with zero workspaces still use the app?). Write
    down how you'd resolve each one — don't just flag it and move on.
 
-Write this in a scratch file (`my-decomposition.md` is fine, it's not
-graded) or on paper — you'll use it directly in Lab 3, so keep it somewhere
-you can find again.
+Write it in `taskboard/my-decomposition.md` (it's not graded). Unit 1 is
+already filled in there as the worked example, and Units 2–4 have the same
+headings with a hint under each one: replace each hint with your own
+answer. For the API/permissions unit, fill in the permission table rather
+than describing the rules in a paragraph; it has a lot of cases, and a
+table makes them easy to check. Unit 4 is the smallest and Unit 2 the
+largest, so it's fine to do them in the order 4, 3, 2. You'll use this file
+directly in Lab 3, so keep it.
 
 ### If you get stuck
 
