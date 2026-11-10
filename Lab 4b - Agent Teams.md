@@ -6,7 +6,7 @@
 **Goal:** Build the same feature as Lab 3 and Lab 4a (Units 2–4 on top of
 the schema: the API, frontend and notifications units, called Units A, B
 and C in Lab 3), this time with Claude Code **agent teams**. A lead session
-creates a shared task list and spawns teammates. The teammates work
+spawns teammates and tracks the work in a task list. The teammates work
 through the tasks and message each other directly, with no human in
 between.
 
@@ -144,9 +144,11 @@ Choose how to handle each overlap. Two patterns work:
   `taskboard/app/workspace_views.py`. Then `routes.py` has only one owner.
 
 You can also order the work: make the notifications hook a task that
-depends on the API teammate's `db.py` task. The shared task list won't
-let anyone claim a task until the tasks it depends on are done. The lead
-only builds a task list if you ask for one, so the prompt in step 3 does.
+depends on the API teammate's `db.py` task, so nobody starts it until the
+`db.py` work is done. The lead only builds a task list if you ask for one,
+so the prompt in step 3 does. Depending on your Claude Code version, the
+lead keeps it in Claude Code's built-in task list or in a `TASKS.md` file
+that every teammate updates. Either works.
 
 Write your ownership table down. You'll paste it into the spawn prompt.
 
@@ -195,8 +197,8 @@ While it runs:
 - Teammates appear in the panel below the prompt. Use the **up and down
   arrows** to select one and **Enter** to see its work. Type there to
   message it directly. **Escape** goes back.
-- **Ctrl+T** shows the shared task list. It's empty if the lead skipped
-  making one; ask it to.
+- **Ctrl+T** shows the built-in task list, if the lead used it. If the
+  lead keeps a `TASKS.md` file instead, ask it: "Show me the task list."
 - Watch the messages between teammates. Does `notifications` actually ask
   `api` to add the hook, or does it edit `db.py` itself?
 
