@@ -2,7 +2,7 @@
 
 **Module:** Orchestrating Multiple Agent Sessions (optional extension)
 **Time:** 45 minutes
-**Codebase:** a fresh copy of the labs repo at the Lab 3 starting point
+**Codebase:** the `lab-4a-start` branch of the labs repo (a fresh app at the Lab 3 starting point)
 **Goal:** Build the same feature as Lab 3 (Units 2–4 on top of the
 schema: the API, frontend and notifications units, called Units A, B and C
 in Lab 3), but this time a single orchestrator agent does the coordinating
@@ -21,54 +21,62 @@ agents are coordinated changes:
 
 ---
 
-## 0. Start from the Lab 3 starting point (5 min)
+## 0. Switch to the Lab 4a branch (5 min)
 
-Make a separate copy so this lab doesn't touch your Lab 3 result. The git
-repo is `orchestration-fundamentals-labs/`; the app lives in its
-`taskboard/` folder. From the folder that contains
-`orchestration-fundamentals-labs/`:
+This lab has its own branch, `lab-4a-start`. It holds a fresh copy of the app at
+the Lab 3 starting point: the starter app plus a reference Unit 1 (the
+workspace schema), with none of Lab 3's code. It also has a complete
+reference decomposition in `taskboard/my-decomposition.md` and the agent files this lab uses, under `.claude/`.
+Your Lab 3 work stays safe on `main`.
 
-```
-git clone orchestration-fundamentals-labs labs-4a
-cd labs-4a
-git log --oneline
-```
-
-Find your workspace/membership schema commit (Unit 1) in the log and reset
-to it, replacing `<sha>` with that commit's id. Tests only run from inside
-`taskboard/`:
+From your `orchestration-fundamentals-labs/` repo:
 
 ```
-git reset --hard <sha>
+git status
+git worktree list
+```
+
+`git status` should show nothing to commit; commit or stash anything left
+over from Lab 3 first. If `git worktree list` still shows Lab 3 worktrees,
+run Lab 3's clean-up step first. Then switch branches and give the app a
+fresh database (`taskboard.db` isn't tracked by git, so your Lab 3 tasks
+would otherwise follow you onto this branch):
+
+```
+git fetch origin
+git switch lab-4a-start
 cd taskboard
+rm -f taskboard.db
+python seed_demo.py
 python -m unittest discover -s tests -v
 cd ..
 ```
 
-All tests should pass. Then copy your Lab 1 decomposition over
-`taskboard/my-decomposition.md` (it replaces the example file already
-there). The orchestrator reads its unit specs from that file:
+`seed_demo.py` should report the Engineering and Marketing workspaces, and
+all tests should pass.
+
+**Optional:** to use your own Lab 1 decomposition instead of the reference
+one, copy it over `taskboard/my-decomposition.md` and commit it:
 
 ```
 cp <path-to-your-lab-1-decomposition> taskboard/my-decomposition.md
-git add taskboard/my-decomposition.md
-git commit -m "Add decomposition"
+git commit -am "Use my decomposition"
 ```
 
-Commit it so the workers' worktrees include it. Everything else in this
-lab runs from the repo root (`labs-4a/`), not from `taskboard/`.
+Everything else in this lab runs from the repo root, not from `taskboard/`.
 
 ---
 
 ## 1. Set up the agents (10 min)
 
-You need three files under `.claude/` at the repo root. Create them on
-`main` in `labs-4a`.
+The branch already has three files under `.claude/` at the repo root. You
+don't need to create them, but read each one before you start: they are
+the whole design of this lab. They're reproduced below.
 
-**`.claude/settings.json`** makes worktrees branch from your local `HEAD`.
-By default Claude Code branches them from the remote's default branch,
-which here is your Lab 3 repo's `main`, and that already has Lab 3's
-merged code on it. The file also pre-approves running the tests and the git
+**`.claude/settings.json`** makes worktrees branch from your local `HEAD`,
+which is `lab-4a-start`. By default Claude Code branches them from the
+remote's default branch, `origin/main`, which has neither the schema nor
+these agent files. The file also pre-approves running the tests and the git
 commands the orchestrator uses to check and merge, so you aren't approving
 a prompt for every step:
 
@@ -136,7 +144,8 @@ model: opus
 You coordinate a feature build. You never write code yourself.
 
 1. Read taskboard/my-decomposition.md and taskboard/FEATURE_REQUEST.md.
-   Unit 1 (the schema) is already on main. Plan Units 2-4: for each, the
+   Unit 1 (the schema) is already on the current branch; run
+   `git branch --show-current` and call that branch BASE. Plan Units 2-4: for each, the
    spec, acceptance criteria, allowed files (as paths from the repo root),
    and the model (haiku, sonnet or opus) and effort level you'll run its
    worker at, with one sentence on why, based on the unit's complexity
@@ -147,24 +156,22 @@ You coordinate a feature build. You never write code yourself.
    query parameter, `?workspace_id=`.
 3. When all three report back, check each one yourself. Don't take its
    summary on trust:
-   - `git diff --stat main...<branch>`: flag files outside its allowed list.
+   - `git diff --stat BASE...<branch>`: flag files outside its allowed list.
    - Run the tests inside its worktree, from its taskboard/ folder.
    - Name any function more than one branch changed.
    Show a status table and a proposed merge order, then wait for the
    user's go-ahead.
-4. Merge one branch at a time with `git merge --no-ff`. After each merge,
-   run the full test suite and check `git rev-parse main`.
+4. Merge into BASE one branch at a time with `git merge --no-ff`. After
+   each merge, run the full test suite and check `git rev-parse HEAD`.
 5. If a merge conflicts or the tests fail, stop. Show the user the
    conflict or failure and suggest options. Don't resolve it yourself.
 ```
 
-Commit the agent files, then start the orchestrator as your main session,
-from the repo root (`labs-4a/`). Start it from a terminal where your
+Start the orchestrator as your main session, from the repo root
+(`orchestration-fundamentals-labs/`). Start it from a terminal where your
 Python venv is active, so the workers can run the tests:
 
 ```
-git add .claude
-git commit -m "Add orchestrator and unit-builder agents"
 claude --agent orchestrator
 ```
 

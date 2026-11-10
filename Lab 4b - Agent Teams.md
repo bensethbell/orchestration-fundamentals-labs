@@ -2,7 +2,7 @@
 
 **Module:** Orchestrating Multiple Agent Sessions (optional extension)
 **Time:** 45 minutes
-**Codebase:** a fresh copy of the labs repo at the Lab 3 starting point
+**Codebase:** the `lab-4b-start` branch of the labs repo (a fresh app at the Lab 3 starting point)
 **Goal:** Build the same feature as Lab 3 and Lab 4a (Units 2–4 on top of
 the schema: the API, frontend and notifications units, called Units A, B
 and C in Lab 3), this time with Claude Code **agent teams**. A lead session
@@ -28,39 +28,59 @@ work with `claude -p`.
 
 ---
 
-## 0. Start from the Lab 3 starting point (5 min)
+## 0. Switch to the Lab 4b branch (5 min)
 
-This is the same setup as Lab 4a, in a separate copy. The git repo is
-`orchestration-fundamentals-labs/`; the app lives in its `taskboard/`
-folder. From the folder that contains `orchestration-fundamentals-labs/`:
+This lab has its own branch, `lab-4b-start`. It holds a fresh copy of the app at
+the Lab 3 starting point: the starter app plus a reference Unit 1 (the
+workspace schema), with none of Lab 3's code. It also has a complete
+reference decomposition in `taskboard/my-decomposition.md` and the settings file this lab uses, `.claude/settings.json`.
+Your Lab 3 work stays safe on `main`.
 
-```
-git clone orchestration-fundamentals-labs labs-4b
-cd labs-4b
-git log --oneline
-```
-
-Replace `<sha>` with your Unit 1 schema commit. Your decomposition
-replaces the example `taskboard/my-decomposition.md`, and tests only run
-from inside `taskboard/`:
+From your `orchestration-fundamentals-labs/` repo:
 
 ```
-git reset --hard <sha>
-cp <path-to-your-lab-1-decomposition> taskboard/my-decomposition.md
+git status
+git worktree list
+```
+
+`git status` should show nothing to commit; commit or stash anything left
+over from Lab 3 first. If `git worktree list` still shows Lab 3 worktrees,
+run Lab 3's clean-up step first. Then switch branches and give the app a
+fresh database (`taskboard.db` isn't tracked by git, so your Lab 3 tasks
+would otherwise follow you onto this branch):
+
+```
+git fetch origin
+git switch lab-4b-start
 cd taskboard
+rm -f taskboard.db
+python seed_demo.py
 python -m unittest discover -s tests -v
 cd ..
 ```
 
-Everything else in this lab runs from the repo root (`labs-4b/`).
+`seed_demo.py` should report the Engineering and Marketing workspaces, and
+all tests should pass.
+
+**Optional:** to use your own Lab 1 decomposition instead of the reference
+one, copy it over `taskboard/my-decomposition.md` and commit it:
+
+```
+cp <path-to-your-lab-1-decomposition> taskboard/my-decomposition.md
+git commit -am "Use my decomposition"
+```
+
+If you did Lab 4a first, this branch starts from scratch again; your 4a
+result stays on `lab-4a-start`. Everything else in this lab runs from the
+repo root, not from `taskboard/`.
 
 ---
 
 ## 1. Turn on agent teams (5 min)
 
-Create `.claude/settings.json` at the root of `labs-4b`. This turns agent teams
-on for this project only, and pre-approves the commands every teammate
-will run. Teammates' permission prompts all appear in the lead's terminal,
+The branch already has `.claude/settings.json` at the repo root; read it
+before you start. It turns agent teams on for this project only, and
+pre-approves the commands every teammate will run. Teammates' permission prompts all appear in the lead's terminal,
 so without this you'll be approving prompts for three agents at once:
 
 ```json
@@ -79,7 +99,7 @@ so without this you'll be approving prompts for three agents at once:
 }
 ```
 
-Allowing `Edit` and `Write` everywhere is fine in a throwaway clone. Don't
+Allowing `Edit` and `Write` everywhere is fine on a throwaway lab branch. Don't
 copy it into a real project.
 
 Start the lead from the repo root, in a terminal where your Python venv
