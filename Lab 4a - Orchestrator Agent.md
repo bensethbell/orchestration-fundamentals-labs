@@ -68,8 +68,9 @@ You need three files under `.claude/` at the repo root. Create them on
 **`.claude/settings.json`** makes worktrees branch from your local `HEAD`.
 By default Claude Code branches them from the remote's default branch,
 which here is your Lab 3 repo's `main`, and that already has Lab 3's
-merged code on it. The file also pre-approves running the tests, so three
-parallel workers don't flood you with permission prompts:
+merged code on it. The file also pre-approves running the tests and the git
+commands the orchestrator uses to check and merge, so you aren't approving
+a prompt for every step:
 
 ```json
 {
@@ -80,7 +81,11 @@ parallel workers don't flood you with permission prompts:
       "Bash(cd taskboard && python -m unittest *)",
       "Bash(git status *)",
       "Bash(git diff *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git merge *)",
+      "Bash(git rev-parse *)",
+      "Bash(git worktree *)"
     ]
   }
 }
@@ -163,6 +168,11 @@ git commit -m "Add orchestrator and unit-builder agents"
 claude --agent orchestrator
 ```
 
+The first time you start Claude Code in a new folder it asks whether you
+trust the folder. The highlighted answer is **"No, exit"**, so pressing
+Enter quits. Press the down arrow to select "Yes, I trust this folder",
+then Enter.
+
 The startup header should show `@orchestrator`.
 
 ---
@@ -182,6 +192,11 @@ There are two checkpoints, and at each one you decide:
    is better? Correct it now if needed. A bad brief
    costs more here than in Lab 3, because you won't see the work until all
    three workers have finished.
+   The orchestrator may also change the shape of the plan, for example
+   proposing a small extra unit that runs first because all three workers
+   would otherwise each write the same helper. That's a legitimate
+   orchestration decision, not a malfunction. Decide whether you agree,
+   just as you would if a colleague suggested it.
 2. **The merge.** Read its status table. Compare its merge order with the
    one you used in Lab 3. Approve it, or tell it a different order.
 
@@ -203,11 +218,16 @@ cd taskboard
 python -m unittest discover -s tests -v
 ```
 
-Then run the **Demo it** walkthrough from Lab 3, steps 1 to 9. Several of
-the problems it catches only show up when the units are put together:
-login route names, which status code non-members get, and whether the
-notification log line actually appears in the server terminal. A check
-of each branch on its own doesn't catch them.
+Then run the **Demo it** walkthrough from Lab 3, steps 1 to 9, including
+its `python seed_demo.py` and `python run.py` setup. Every expected result
+comes from `taskboard/FEATURE_REQUEST.md`, so if a step doesn't match, the
+merged code is wrong, not the walkthrough. The demo checks things no single
+worker's tests can: that the switcher page and the API agree on
+`?workspace_id=`, that a non-member gets `403` from the merged routes, and
+that the notification line appears in the server terminal when the API
+assigns a task. If a step fails, describe the failure to the orchestrator
+and let it send a worker to fix it; that's one more round of the loop you
+just ran.
 
 ---
 

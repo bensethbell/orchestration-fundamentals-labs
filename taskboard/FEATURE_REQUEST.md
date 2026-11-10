@@ -22,16 +22,29 @@ Add multi-workspace support to TaskBoard:
      and change any task.
    - A **member** can create tasks and edit tasks assigned to them, but
      cannot delete tasks or manage membership.
+   - The current user comes from `app/identity.py` (already in the app; see
+     the README). A request with no identified user gets **401**.
+   - A request for a workspace the user doesn't belong to gets **403**, with
+     no task data in the body.
+   - A new task created without an `owner_id` is assigned to the user who
+     created it.
+   - A task can only be assigned to a member of its workspace. Assigning it
+     to anyone else is rejected with **400**.
 
 3. **Workspace switcher (UI).** The web UI should let a logged-in user see
    which workspaces they belong to and switch between them; the task list
-   should only ever show tasks for the currently selected workspace.
+   should only ever show tasks for the currently selected workspace. "Logged
+   in" means the user visited `/login/<user_id>` (see the README). The
+   selected workspace is passed as `?workspace_id=`, the same parameter the
+   API uses. A user in no workspace sees a friendly empty state, not an error.
 
 4. **Assignment notifications.** When a task is assigned to a user (i.e. its
    `owner_id` is set or changed), that user should receive an email
    notification. For this exercise, "send an email" means calling a
    `notify(user, task)` function that logs the notification — you do not need
-   to wire up a real mail provider.
+   to wire up a real mail provider. Log it at INFO level as
+   `Notifying {user email}: assigned to {task title}`; `run.py` already
+   prints INFO lines to the server terminal.
 
 ## Constraints and notes for facilitators / participants
 
@@ -46,5 +59,8 @@ Add multi-workspace support to TaskBoard:
   script), and don't modify it.
 - Once the schema/migration piece is done, the API/permissions work, the
   frontend workspace switcher, and the notification hook are largely
-  independent of each other and don't touch the same files — that's
-  deliberate too, and it's what Module 3's parallel-worktree lab uses.
+  independent of each other — that's deliberate too, and it's what Module
+  3's parallel-worktree lab uses. "Largely" matters: the API and switcher
+  units both touch `app/routes.py`, and the API and notification units both
+  touch `app/db.py`. Spotting and planning for those overlaps is part of the
+  exercise.

@@ -6,8 +6,9 @@
 **Goal:** Build the same feature as Lab 3 and Lab 4a (Units 2–4 on top of
 the schema: the API, frontend and notifications units, called Units A, B
 and C in Lab 3), this time with Claude Code **agent teams**. A lead session
-creates a shared task list and spawns teammates. The teammates claim
-tasks and message each other directly, with no human in between.
+creates a shared task list and spawns teammates. The teammates work
+through the tasks and message each other directly, with no human in
+between.
 
 | | Lab 3 | Lab 4a | Lab 4b (this lab) |
 |---|---|---|---|
@@ -88,9 +89,15 @@ is active:
 claude
 ```
 
-All teammates run inside this one terminal by default. If you use tmux or
-iTerm2 and want a split pane for each teammate, start with
-`claude --teammate-mode tmux` instead. That's optional.
+The first time you start Claude Code in a new folder it asks whether you
+trust the folder. The highlighted answer is **"No, exit"**, so pressing
+Enter quits. Press the down arrow to select "Yes, I trust this folder",
+then Enter.
+
+In a normal terminal, all teammates run inside this one window. If you
+start `claude` inside a tmux session, each teammate gets its own tmux pane
+automatically. In iTerm2 you can ask for split panes with
+`claude --teammate-mode tmux`. Either way is fine.
 
 ---
 
@@ -118,7 +125,8 @@ Choose how to handle each overlap. Two patterns work:
 
 You can also order the work: make the notifications hook a task that
 depends on the API teammate's `db.py` task. The shared task list won't
-let anyone claim a task until the tasks it depends on are done.
+let anyone claim a task until the tasks it depends on are done. The lead
+only builds a task list if you ask for one, so the prompt in step 3 does.
 
 Write your ownership table down. You'll paste it into the spawn prompt.
 
@@ -144,14 +152,18 @@ so anything they need to know has to be in this prompt:
 > Spawn three teammates: api (Sonnet), frontend (Sonnet) and
 > notifications (Haiku). [Change the models to your own picks.]
 > Each one gets its unit's spec and acceptance criteria from
-> taskboard/my-decomposition.md.
+> taskboard/my-decomposition.md. Before spawning anyone, put one task per
+> unit in the shared task list, plus any hand-off tasks (such as adding the
+> notify hook to db.py), with their dependencies.
 >
 > File ownership (only the owner edits a file; anyone else messages the owner):
 > [paste your table from step 2]
 >
 > Rules for every teammate:
 > - The selected workspace is passed as ?workspace_id= everywhere.
-> - While working, run only your own test file. Others are editing too.
+> - While working, run only your own test file, from taskboard/:
+>   python -m unittest discover -s tests -p "test_<yours>.py" -v
+>   Others are editing too.
 > - Message the teammate who owns a file instead of editing it.
 >
 > Don't implement anything yourself. Wait for the teammates to finish,
@@ -163,7 +175,8 @@ While it runs:
 - Teammates appear in the panel below the prompt. Use the **up and down
   arrows** to select one and **Enter** to see its work. Type there to
   message it directly. **Escape** goes back.
-- **Ctrl+T** shows the shared task list.
+- **Ctrl+T** shows the shared task list. It's empty if the lead skipped
+  making one; ask it to.
 - Watch the messages between teammates. Does `notifications` actually ask
   `api` to add the hook, or does it edit `db.py` itself?
 
@@ -183,15 +196,20 @@ When everyone is done, ask the lead to shut the team down:
 There's nothing to merge, but there is still something to check:
 
 ```
+git add -A
 git status
-git diff --stat
+git diff --cached --stat
 cd taskboard
 python -m unittest discover -s tests -v
 ```
 
-Look through `git diff` for edits by someone who didn't own the file. Then
-run the **Demo it** walkthrough from Lab 3, steps 1 to 9. Commit when
-you're happy with it.
+`git add -A` stages everything (nothing is committed yet) so the new files
+the teammates created show up in the diff. Look through
+`git diff --cached` for edits by someone who didn't own the file. Then run
+the **Demo it** walkthrough from Lab 3, steps 1 to 9, including its
+`python seed_demo.py` and `python run.py` setup. Every expected result comes
+from `taskboard/FEATURE_REQUEST.md`, so if a step doesn't match, the code is
+wrong, not the walkthrough. Commit when you're happy with it.
 
 ---
 
@@ -217,6 +235,9 @@ Be ready to answer these:
   instead. Ask again and explicitly ask for an agent team.
 - **A teammate stops early:** select it in the panel and give it more
   instructions, or ask the lead to spawn a replacement.
+- **A teammate won't shut down:** it may be unable to approve the
+  shutdown request. If it has finished its work, tell the lead to stop
+  it directly.
 - **A task looks stuck:** task status can lag. Check whether the work is
   actually done, then tell the lead to mark it complete.
 - **You resumed the session and the teammates are gone:** `/resume`

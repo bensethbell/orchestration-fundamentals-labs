@@ -338,7 +338,7 @@ TaskBoard app too (its own README creates the first task via curl, not a
 form); none of Units 1–4 were ever asked to add a creation form, so don't
 look for one.
 
-Do these seven steps in order. Each one has three parts: what it's
+Do these nine steps in order. Each one has three parts: what it's
 testing, the exact command to run, and what the result should be. The
 command is always the line starting with `curl` — nothing else in these
 steps is something you type.
