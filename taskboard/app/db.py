@@ -17,7 +17,23 @@ CREATE TABLE IF NOT EXISTS task (
     status TEXT DEFAULT 'todo',
     created_at TEXT NOT NULL,
     owner_id INTEGER,
-    FOREIGN KEY (owner_id) REFERENCES user (id)
+    workspace_id INTEGER,
+    FOREIGN KEY (owner_id) REFERENCES user (id),
+    FOREIGN KEY (workspace_id) REFERENCES workspace (id)
+);
+
+CREATE TABLE IF NOT EXISTS workspace (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS workspace_member (
+    workspace_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'member')),
+    PRIMARY KEY (workspace_id, user_id),
+    FOREIGN KEY (workspace_id) REFERENCES workspace (id),
+    FOREIGN KEY (user_id) REFERENCES user (id)
 );
 """
 
@@ -40,6 +56,10 @@ def init_db(app):
     with app.app_context():
         db = get_db()
         db.executescript(SCHEMA)
+        # Existing databases predate task.workspace_id; CREATE IF NOT EXISTS won't add it.
+        columns = [r["name"] for r in db.execute("PRAGMA table_info(task)")]
+        if "workspace_id" not in columns:
+            db.execute("ALTER TABLE task ADD COLUMN workspace_id INTEGER")
         db.commit()
     app.teardown_appcontext(close_db)
 
@@ -93,6 +113,44 @@ def update_task(task_id, **fields):
 def list_users():
     rows = get_db().execute("SELECT * FROM user").fetchall()
     return [{"id": r["id"], "name": r["name"], "email": r["email"]} for r in rows]
+
+
+def create_workspace(name):
+    db = get_db()
+    cur = db.execute("INSERT INTO workspace (name) VALUES (?)", (name,))
+    db.commit()
+    return {"id": cur.lastrowid, "name": name}
+
+
+def add_member(workspace_id, user_id, role):
+    db = get_db()
+    db.execute(
+        "INSERT INTO workspace_member (workspace_id, user_id, role) VALUES (?, ?, ?)",
+        (workspace_id, user_id, role),
+    )
+    db.commit()
+
+
+def list_workspaces_for_user(user_id):
+    rows = get_db().execute(
+        """
+        SELECT workspace.id, workspace.name, workspace_member.role
+        FROM workspace
+        JOIN workspace_member ON workspace_member.workspace_id = workspace.id
+        WHERE workspace_member.user_id = ?
+        ORDER BY workspace.name
+        """,
+        (user_id,),
+    ).fetchall()
+    return [{"id": r["id"], "name": r["name"], "role": r["role"]} for r in rows]
+
+
+def get_member_role(workspace_id, user_id):
+    row = get_db().execute(
+        "SELECT role FROM workspace_member WHERE workspace_id = ? AND user_id = ?",
+        (workspace_id, user_id),
+    ).fetchone()
+    return row["role"] if row else None
 
 
 def row_to_task_dict(row):
