@@ -23,9 +23,12 @@ everything else, so it goes first, on `main`, with no parallelism:
    git switch main
    git status
    ```
-   `git status` should show nothing to commit. Then build the schema unit:
+   `git status` should show nothing to commit. Then build the schema unit,
+   starting the session at the model and effort level you'd pick for it
+   using Lab 2's reasoning (Sonnet at `medium` is a sensible default for a
+   well-specified schema change):
    ```
-   claude
+   claude --model sonnet --effort medium
    > Implement the workspace/membership schema unit from FEATURE_REQUEST.md:
    > [paste your Lab 1 spec for this unit, acceptance criteria included]
    ```
@@ -74,6 +77,20 @@ TaskBoard feature, that's typically:
 - **Unit C — Assignment notifications** (a new small module, e.g.
   `app/notifications.py`, plus a hook where `owner_id` gets set)
 
+**First, pick a model and effort level for each unit,** exactly as you did
+for the tasks in Lab 2: (a) model, (b) effort level, (c) one sentence on
+why, based on the unit's complexity and what a mistake would cost. Write
+them down, because Labs 4a and 4b compare your picks with an agent's. One
+reasonable set, to check yours against rather than copy:
+
+| Unit | Model | Effort | Why |
+|---|---|---|---|
+| A: API & permissions | `opus` | `high` | The security boundary, with the most judgment calls (401 vs 403, who may edit what). A mistake leaks data between teams. |
+| B: Frontend switcher | `sonnet` | `medium` | One route and one template; low risk, but needs care with edge cases like a user in no workspace. |
+| C: Notifications | `haiku` | `medium` | A small, fully specified module plus two hook points. |
+
+Then start each session with your picks, using `--model` and `--effort`.
+
 Create one worktree per unit. **Each `claude --worktree` command opens a
 full interactive session and takes over your terminal — it will not hand
 control back until you exit it.** Open three separate terminal tabs or
@@ -82,16 +99,20 @@ one terminal expecting them to queue up — only the first will run):
 
 Tab 1:
 ```
-claude --worktree unit-a-api
+claude --worktree unit-a-api --model opus --effort high
 ```
 Tab 2:
 ```
-claude --worktree unit-b-frontend
+claude --worktree unit-b-frontend --model sonnet --effort medium
 ```
 Tab 3:
 ```
-claude --worktree unit-c-notifications
+claude --worktree unit-c-notifications --model haiku --effort medium
 ```
+
+Replace the models and effort levels with your own picks. The status line
+at the bottom of each session shows the model and effort it's running at;
+check it before you hand over the spec.
 
 **Alternatives to three tabs, if you're comfortable with the CLI flags**
 (per `claude --help` — try one yourself before relying on it live, the
@@ -102,7 +123,7 @@ running it):
   terminal one after another without blocking. Pass the unit's spec as
   the trailing prompt so it starts working right away:
   ```
-  claude --worktree unit-a-api --bg "Implement the API & permission enforcement unit: ..."
+  claude --worktree unit-a-api --model opus --effort high --bg "Implement the API & permission enforcement unit: ..."
   ```
   Check on them with `claude agents` (lists all background sessions and
   their ids), `claude logs <id>` (peek at output without attaching), and
@@ -113,7 +134,7 @@ running it):
   native iTerm2 pane if you're on iTerm2, or a real tmux session otherwise
   (`--tmux=classic` to force that):
   ```
-  claude --worktree unit-a-api --tmux
+  claude --worktree unit-a-api --model opus --effort high --tmux
   ```
   Still one command per unit, but you get a split-pane layout instead of
   managing tabs by hand. If tmux is new to you, its pane-switching keys
@@ -322,7 +343,7 @@ TaskBoard app too (its own README creates the first task via curl, not a
 form); none of Units 1–4 were ever asked to add a creation form, so don't
 look for one.
 
-Do these seven steps in order. Each one has three parts: what it's
+Do these nine steps in order. Each one has three parts: what it's
 testing, the exact command to run, and what the result should be. The
 command is always the line starting with `curl` — nothing else in these
 steps is something you type.
