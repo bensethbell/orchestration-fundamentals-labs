@@ -46,6 +46,68 @@ Add multi-workspace support to TaskBoard:
    `Notifying {user email}: assigned to {task title}`; `run.py` already
    prints INFO lines to the server terminal.
 
+## The database, before and after
+
+**Today** `app/db.py` has two tables. A task can have an owner, and there's
+nothing that groups tasks or users:
+
+```mermaid
+erDiagram
+    USER ||--o{ TASK : "owns (owner_id)"
+    USER {
+        int id PK
+        text name
+        text email "UNIQUE"
+    }
+    TASK {
+        int id PK
+        text title
+        text description
+        text status "todo, in_progress, done"
+        text created_at
+        int owner_id FK "nullable"
+    }
+```
+
+**After this feature** there are two new tables, and `task` gains a
+`workspace_id` column. `workspace_member` is the join table that says which
+users belong to which workspace, and with which role:
+
+```mermaid
+erDiagram
+    USER ||--o{ TASK : "owns (owner_id)"
+    WORKSPACE ||--o{ TASK : "contains (workspace_id)"
+    USER ||--o{ WORKSPACE_MEMBER : "joins"
+    WORKSPACE ||--o{ WORKSPACE_MEMBER : "has"
+    USER {
+        int id PK
+        text name
+        text email "UNIQUE"
+    }
+    TASK {
+        int id PK
+        text title
+        text description
+        text status "todo, in_progress, done"
+        text created_at
+        int owner_id FK "nullable"
+        int workspace_id FK "NEW, nullable"
+    }
+    WORKSPACE {
+        int id PK "NEW table"
+        text name
+    }
+    WORKSPACE_MEMBER {
+        int workspace_id FK "NEW table"
+        int user_id FK
+        text role "admin or member"
+    }
+```
+
+`workspace_id` is nullable so tasks that already exist in `taskboard.db`
+don't break when the column is added. The table and column names match
+what `seed_demo.py` expects, so use them exactly.
+
 ## Constraints and notes for facilitators / participants
 
 - This is intentionally underspecified in places (e.g., what happens to a
